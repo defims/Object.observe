@@ -1,0 +1,81 @@
+<!doctype html>
+<head>
+</head>
+<body>
+<script>
+
+/* nestObject@Array is a function used to parse nest Object, tree walker is slower than array walker
+ * so user an Array for dirtycheck
+ */
+function nestObject2Array(obj){
+	var nodes	= [{key:'',value: obj,length:0}],
+		arr		= [],
+		key,node,nodeKey;
+	while(nodes.length){
+		node		= nodes.pop();
+		nodeKey		= node.key;
+		nodeValue	= node.value;
+		arr.push(node);
+		if(typeof nodeValue == 'object')
+			for(key in nodeValue){
+				nodes.push({key:key, value:nodeValue[key]});
+				node.length	++;
+			}
+	}
+	return arr
+}
+/*
+ * test
+ *
+ */
+var arr = nestObject2Array({
+	a: {
+		b: {
+			c: [
+				{d:''},
+				{d1:true},
+				{d2:'',d3:'string'}
+			],
+			c1: {},
+			c2: null,
+			c3: undefined,
+			c4: 1,
+			c5: 0
+		},
+		b1: [],
+		b2: function(){
+		}
+	},
+	a1: ''
+});
+for(var i=0; i<arr.length; i++) console.log(i,JSON.stringify(arr[i]));
+</script>
+<script>
+/*
+var updateWatcher = function(prefix){
+  return function(updates){
+    var i = 0, l = updates.length, update;
+    for(i=0; i<l; i++){
+      update = updates[i];
+      console.log(prefix, update.name, update.type, update.oldValue, '-->', update.value);
+    }
+  }
+};
+var tmp = {foo: 'test'};
+Object.observe(tmp, updateWatcher(1));
+tmp.foo = 'bar';
+tmp.foo = 'none';
+tmp.foo = 'some';
+tmp.bar = "bar added";
+Object.observe(tmp, updateWatcher(2));
+ 
+setTimeout(function(){
+  delete tmp.bar;
+  tmp.foo = 'another update';
+  tmp.h	= 'oo'
+  //tmp.getNotifier()._checkPropertyListing();
+}, 5000);
+*/
+</script>
+</body>
+</html>
