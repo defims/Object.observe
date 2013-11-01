@@ -19,16 +19,17 @@ it's base on setImmediate and defineProperty
  * Node.js
  * Web workers in browsers that support `MessageChannel`, which I can't find solid info on.
 
+##difference between strawman:observe
+it's a little different from http://wiki.ecmascript.org/doku.php?id=strawman:observe 
+Objece.observe trigger with a changes Array and will fire each time after the browser parse javascript
+defineProperty will trigger when you get or set the object
+
 ##Usage
+
 ...js
 var obj1    = {
     a: 0
 };
-/*
-it's a little different from http://wiki.ecmascript.org/doku.php?id=strawman:observe 
-Objece.observe trigger with a changes Array and will fire each time after the browser parse javascript
-defineProperty will trigger when you get or set the object
-*/
 observe(obj1,function(change){
     console.log(change,change.object[change.name],change.value);
 })
