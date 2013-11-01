@@ -7,7 +7,8 @@ for exists properties, direct use defineProperty method
 for new properties, setImmediate is used
 there is a setImmediate polyfill and a defineProperty polyfill included
 
-
+##dependency
+it has include setImmediate https://github.com/NobleJS/setImmediate and a defineProperty polyfill
 
 ##Browsers support
 it's base on setImmediate and defineProperty
