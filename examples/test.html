@@ -1,0 +1,25 @@
+<!doctype html>
+<head>
+<script src="../observe.js"></script>
+</head>
+<body>
+<div id="debug">hi</div>
+<script>
+var obj1    = {
+    a: 0
+};
+observe(obj1,function(change){
+    console.log(change,change.object[change.name],change.value);
+})
+obj1.a=3
+obj1.b=5
+obj1.c={a:1}
+setTimeout(function(){
+    obj1.d = 1;
+},1000)
+setTimeout(function(){
+    obj1.d = {d:0};
+},1500)
+</script>
+</body>
+</html>
