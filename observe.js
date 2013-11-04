@@ -252,18 +252,18 @@ if (Object.prototype.__defineGetter__ && !Object.defineProperty) {//__defineGett
     }
     var definePropertyWorksOnObject = doesDefinePropertyWorkOn({}),
         definePropertyWorksOnDom    = typeof document == "undefined" || doesDefinePropertyWorkOn(document.createElement("div"));
-	if(!definePropertyWorksOnObject && window.VBArray){//defineProperty works failed on pure object such as ie8
-		//use VBscript class
-		//document.write('ie6 ie7 ie8');
+    if(!definePropertyWorksOnObject && window.VBArray){//defineProperty works failed on pure object such as ie8
+        //use VBscript class
+        //document.write('ie6 ie7 ie8');
         //getOwnPropertyDescriptor needed
         //building...
-	}else if(!definePropertyWorksOnDom){//webkit dom defineProperty polyfill
+    }else if(!definePropertyWorksOnDom){//webkit dom defineProperty polyfill
         //getOwnPropertyDescriptor
         //building...
     }/*else{
-		//document.write('modern');	
+        //document.write('modern'); 
         console.log('mordern')
-	}*/
+    }*/
 }
 })();
 
@@ -272,44 +272,44 @@ if (Object.prototype.__defineGetter__ && !Object.defineProperty) {//__defineGett
  * so user an Array for dirtycheck
  */
 function nestObject2Array(obj, parent, key){
-	var nodes	= [{key:key, value: obj, length: 0, parent: { value: parent }}],
-		arr		= [],
-		k,node,nodeKey;
+    var nodes   = [{key:key, value: obj, length: 0, parent: { key: '', value: parent, length: 0 }}],
+        arr     = [],
+        k,node,nodeKey;
 
-	while(nodes.length){
-		node		= nodes.pop();
-		nodeKey		= node.key;
-		nodeValue	= node.value;
-		arr.push(node);
-		if(typeof nodeValue == 'object')
-			for(k in nodeValue){
-				nodes.push({key: k, value: nodeValue[k], parent: node, length: 0});
-				node.length	++;
-			}
-	}
+    while(nodes.length){
+        node        = nodes.pop();
+        nodeKey     = node.key;
+        nodeValue   = node.value;
+        arr.push(node);
+        if(typeof nodeValue == 'object')
+            for(k in nodeValue){
+                nodes.push({key: k, value: nodeValue[k], parent: node, length: 0});
+                node.length ++;
+            }
+    }
 
-	return arr
+    return arr
 }
 /*test*
-var obj	= {
-	a: {
-		b: {
-			c: [
-				{d:''},
-				{d1:true},
-				{d2:'',d3:'string'}
-			],
-			c1: {},
-			c2: null,
-			c3: undefined,
-			c4: 1,
-			c5: 0
-		},
-		b1: [],
-		b2: function(){
-		}
-	},
-	a1: ''
+var obj = {
+    a: {
+        b: {
+            c: [
+                {d:''},
+                {d1:true},
+                {d2:'',d3:'string'}
+            ],
+            c1: {},
+            c2: null,
+            c3: undefined,
+            c4: 1,
+            c5: 0
+        },
+        b1: [],
+        b2: function(){
+        }
+    },
+    a1: ''
 }
 var arr = nestObject2Array(obj, window, 'obj');
 //console.log(JSON.stringify(arr))
@@ -324,49 +324,49 @@ console.log(arr1);
  * observeProperty 
  */
 function observeProperty(obj, prop, updates, callback){
-	var _value	        = obj[prop];
-	Object.defineProperty(obj, prop, {
-		get: function(){
-			//console.log('get')
-			return _value;
-		},
-		set: function(value){//changeobserve
-			//console.log('set')
-			/*updates.push({
-				name: prop,
-				object:	obj,
-				type: 'updated',
-				oldValue: _value,
-				value: value
-			});*/
+    var _value          = obj[prop];
+    Object.defineProperty(obj, prop, {
+        get: function(){
+            //console.log('get')
+            return _value;
+        },
+        set: function(value){//changeobserve
+            //console.log('set')
+            /*updates.push({
+                name: prop,
+                object: obj,
+                type: 'updated',
+                oldValue: _value,
+                value: value
+            });*/
             var oldValue    = _value;
-			    o           = {//its a little difference form the 
+                o           = {//its a little difference form the
                     name: prop,
-                    object:	obj,
+                    object: obj,
                     type: 'updated',
                     oldValue: _value
                 };
-			_value	= value;
+            _value  = value;
             Object.defineProperty(o, 'value', {
                 get: function(){
-                    return _value; 
+                    return _value;
                 },
                 set: function(value){
                     _value = value;
                 }
             });
             callback(o);
-		}
-	});
+        }
+    });
 }
 /*test*
 for(var i=0; i<arr.length; i++){
-	var item	= arr[i],
-		key		= item.key,
-		parent	= item.parent? item.parent.value : window,
-		updates	= [];
+    var item    = arr[i],
+        key     = item.key,
+        parent  = item.parent? item.parent.value : window,
+        updates = [];
 
-	if(key) observeProperty(parent, key, updates)
+    if(key) observeProperty(parent, key, updates)
 }
 console.log(JSON.stringify(obj))
 console.log(obj.a);
@@ -382,85 +382,100 @@ console.log(JSON.stringify(list));
  * it use definePropery to detect the change of property, so each change will trigger a callback
  */
 function observe(object, callback){
-	var arr	        = nestObject2Array(object),
-		len	        = arr.length,
+    var arr         = nestObject2Array(object),
+        len         = arr.length,
         observeList = [],
-		k,obj,desc,childLen,childArr;
-    //console.log('arr:',arr)	
+        k,obj,parent,item,desc,childLen,childArr;
+    //console.log('arr:',arr)   
     while(len--){
-		var item	= arr[len],
-			key		= item.key,
-			parent	= item.parent? item.parent.value : window,
-			updates = [];
+        item    = arr[len];
+        k       = item.key;
+        parent  = item.parent? item.parent.value : window;
+        var updates = [];
         //setImmediate updates
-		if(key) observeProperty(parent, key, updates, callback);
-	}
+        if(k) observeProperty(parent, k, updates, callback);
+    }
 
     //setImmediate new property detect
     function detectNewProp(){
         //document.getElementById('debug').innerHTML += 'detect<br/>'
         len = arr.length;
         while(len--){
-            obj    = arr[len].value;
-            for(k in obj){//only works on object
-                if(obj.hasOwnProperty(k) ){//ignore prototype
-                    desc        = Object.getOwnPropertyDescriptor(obj, k);
-                    if(!desc.get && !desc.set){//detect new prop
-                        childArr    = nestObject2Array(obj[k], obj, k);
-                        childLen    = childArr.length;
-                        
-                        while(childLen--){
-                            var updates = [],
-                                o       = childArr[childLen],
-                                ok      = o.key,
-                                ov      = o.value,
-                                op      = o.parent ? o.parent.value : obj;
-                            //trigger new
-                            callback({
-                                name: ok,
-                                object:	op,
-                                type: 'new',
-                                oldValue: '',
-                                value: ov
-                            });
-                            observeProperty(op, ok, updates, callback);
+            item    = arr[len];
+            if(item){
+                obj     = item.value;
+                k       = item.key;
+                parent  = item.parent? item.parent.value : window;
+                if(parent && !parent[k]) {//trigger delete
+                    callback({
+                        name: k,
+                        object: parent,
+                        type: 'delete',
+                        oldValue: item.value
+                    });
+                    delete arr[len];
+                }
+                for(k in obj){//only works on object
+                    if(obj.hasOwnProperty(k) ){//ignore prototype
+                        desc        = Object.getOwnPropertyDescriptor(obj, k);
+                        if(!desc.get && !desc.set){//detect new prop
+                            childArr    = nestObject2Array(obj[k], obj, k);
+                            childLen    = childArr.length;
+                            while(childLen--){
+                                var updates = [],
+                                    o       = childArr[childLen],
+                                    ok      = o.key,
+                                    ov      = o.value,
+                                    op      = o.parent ? o.parent.value : obj;
+                                //trigger new
+                                callback({
+                                    name: ok,
+                                    object: op,
+                                    type: 'new',
+                                    oldValue: '',
+                                    value: ov
+                                });
+                                observeProperty(op, ok, updates, callback);
+                            }
+                            arr = arr.concat(childArr);
                         }
-                        arr = arr.concat(childArr);
                     }
                 }
             }
         }
+        //console.log('\n')
         var id = setImmediate(detectNewProp);
         //setTimeout(detectNewProp,0)
     };
     var id = setImmediate(detectNewProp);
-    //setTimeout(detectNewProp,0)
+    //setTimeout(detectNewProp,2000)
     //detectNewProp();
 }
 
 /*test*
-var obj	= {
-	a: {
-		b: {
-			c: [
-				{d:''},
-				{d1:true},
-				{d2:'',d3:'string'}
-			],
-			c1: {},
-			c2: null,
-			c3: undefined,
-			c4: 1,
-			c5: 0
-		},
-		b1: [],
-		b2: function(){
-		}
-	},
-	a1: ''
+var obj = {
+    a: {
+        b: {
+            c: [
+                {d:''},
+                {d1:true},
+                {d2:'',d3:'string'}
+            ],
+            c1: {},
+            c2: null,
+            c3: undefined,
+            c4: 1,
+            c5: 0
+        },
+        b1: [],
+        b2: function(){
+        }
+    },
+    a1: ''
 }
+
 observe(obj,function(change){
-	console.log(change)
+    console.log(change)
 })
 //console.log(JSON.stringify(obj))
 //console.log(obj.a);
@@ -481,6 +496,7 @@ observe(obj1,function(change){
 obj1.a=3
 obj1.b=5
 obj1.c={a:1}
+delete obj1.a
 setTimeout(function(){
     obj1.d = 1;
 },1000)

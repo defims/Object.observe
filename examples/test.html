@@ -13,7 +13,10 @@ observe(obj1,function(change){
 })
 obj1.a=3
 obj1.b=5
-obj1.c={a:1}
+obj1.c={a1:1}
+delete obj1.a;
+obj1.a = 10;
+obj1.a = '';
 setTimeout(function(){
     obj1.d = 1;
 },1000)
