@@ -268,14 +268,13 @@ if (Object.prototype.__defineGetter__ && !Object.defineProperty) {//__defineGett
 })();
 
 
-/* nestObject@Array is a function used to parse nest Object, tree walker is slower than array walker
- * so user an Array for dirtycheck
+/* nestObject2Array is a function used to parse nest Object, tree walker is slower than array walker
+ * so use an Array for dirtycheck
  */
 function nestObject2Array(obj, parent, key){
     var nodes   = [{key:key, value: obj, length: 0, parent: { key: '', value: parent, length: 0 }}],
         arr     = [],
         k,node,nodeKey;
-
     while(nodes.length){
         node        = nodes.pop();
         nodeKey     = node.key;
@@ -287,8 +286,7 @@ function nestObject2Array(obj, parent, key){
                 node.length ++;
             }
     }
-
-    return arr
+    return arr;
 }
 /*test*
 var obj = {
@@ -313,12 +311,12 @@ var obj = {
 }
 var arr = nestObject2Array(obj, window, 'obj');
 //console.log(JSON.stringify(arr))
+
 console.log(arr)
 //for(var i=0; i<arr.length; i++) console.log(i,JSON.stringify(arr[i]));
 var obj1 = 2;
 var arr1    = nestObject2Array(obj1, window, 'obj1');
 console.log(arr1);
-/**/
 
 /*
  * observeProperty 
@@ -382,10 +380,9 @@ console.log(JSON.stringify(list));
  * it use definePropery to detect the change of property, so each change will trigger a callback
  */
 function observe(object, callback){
-    var arr         = nestObject2Array(object),
-        len         = arr.length,
-        observeList = [],
-        k,obj,parent,item,desc,childLen,childArr;
+    var arr             = nestObject2Array(object),
+        len             = arr.length,
+        obj,parent,item,desc,childLen,childArr;
     //console.log('arr:',arr)   
     while(len--){
         item    = arr[len];
@@ -400,6 +397,7 @@ function observe(object, callback){
     function detectNewProp(){
         //document.getElementById('debug').innerHTML += 'detect<br/>'
         len = arr.length;
+        //handle root item
         while(len--){
             item    = arr[len];
             if(item){
@@ -415,29 +413,31 @@ function observe(object, callback){
                     });
                     delete arr[len];
                 }
-                for(k in obj){//only works on object
-                    if(obj.hasOwnProperty(k) ){//ignore prototype
-                        desc        = Object.getOwnPropertyDescriptor(obj, k);
-                        if(!desc.get && !desc.set){//detect new prop
-                            childArr    = nestObject2Array(obj[k], obj, k);
-                            childLen    = childArr.length;
-                            while(childLen--){
-                                var updates = [],
-                                    o       = childArr[childLen],
-                                    ok      = o.key,
-                                    ov      = o.value,
-                                    op      = o.parent ? o.parent.value : obj;
-                                //trigger new
-                                callback({
-                                    name: ok,
-                                    object: op,
-                                    type: 'new',
-                                    oldValue: '',
-                                    value: ov
-                                });
-                                observeProperty(op, ok, updates, callback);
+                if(typeof(obj) == 'object'){
+                    for(k in obj){//only works on Object
+                        if(obj.hasOwnProperty(k) ){//ignore prototype
+                            desc        = Object.getOwnPropertyDescriptor(obj, k);
+                            if(!desc.get && !desc.set){//detect new prop
+                                childArr    = nestObject2Array(obj[k], obj, k);
+                                childLen    = childArr.length;
+                                while(childLen--){
+                                    var updates = [],
+                                        o       = childArr[childLen],
+                                        ok      = o.key,
+                                        ov      = o.value,
+                                        op      = o.parent ? o.parent.value : obj;
+                                    //trigger new
+                                    callback({
+                                        name: ok,
+                                        object: op,
+                                        type: 'new',
+                                        oldValue: '',
+                                        value: ov
+                                    });
+                                    observeProperty(op, ok, updates, callback);
+                                }
+                                arr = arr.concat(childArr);
                             }
-                            arr = arr.concat(childArr);
                         }
                     }
                 }
